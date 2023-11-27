@@ -29,113 +29,115 @@ geraSaida(nome,Ft,Ut,Epsi,Fi,Ti)
 -------------------------------------------------------------------------------
 
 """
-def plota(N,Inc):
+
+
+def plota(N, Inc):
     # Numero de membros
-    nm = len(Inc[:,0])
-    
+    nm = len(Inc[:, 0])
+
     import matplotlib as mpl
     import matplotlib.pyplot as plt
 
-#    plt.show()
+    #    plt.show()
     fig = plt.figure()
     # Passa por todos os membros
     for i in range(nm):
-        
-        # encontra no inicial [n1] e final [n2] 
-        n1 = int(Inc[i,0])
-        n2 = int(Inc[i,1])        
+        # encontra no inicial [n1] e final [n2]
+        n1 = int(Inc[i, 0])
+        n2 = int(Inc[i, 1])
 
-        plt.plot([N[0,n1-1],N[0,n2-1]],[N[1,n1-1],N[1,n2-1]],color='r',linewidth=3)
+        plt.plot(
+            [N[0, n1 - 1], N[0, n2 - 1]],
+            [N[1, n1 - 1], N[1, n2 - 1]],
+            color="r",
+            linewidth=3,
+        )
 
-
-    plt.xlabel('x [m]')
-    plt.ylabel('y [m]')
+    plt.xlabel("x [m]")
+    plt.ylabel("y [m]")
     plt.grid(True)
-    plt.axis('equal')
+    plt.axis("equal")
     plt.show()
-    
+
+
 def importa(entradaNome):
-    
     import numpy as np
     import xlrd
-    
+
     arquivo = xlrd.open_workbook(entradaNome)
-    
+
     ################################################## Ler os nos
-    nos = arquivo.sheet_by_name('Nos')
-    
+    nos = arquivo.sheet_by_name("Nos")
+
     # Numero de nos
-    nn = int(nos.cell(1,3).value)
-                 
+    nn = int(nos.cell(1, 3).value)
+
     # Matriz dos nós
-    N = np.zeros((2,nn))
-    
+    N = np.zeros((2, nn))
+
     for c in range(nn):
-        N[0,c] = nos.cell(c+1,0).value
-        N[1,c] = nos.cell(c+1,1).value
-    
+        N[0, c] = nos.cell(c + 1, 0).value
+        N[1, c] = nos.cell(c + 1, 1).value
+
     ################################################## Ler a incidencia
-    incid = arquivo.sheet_by_name('Incidencia')
-    
+    incid = arquivo.sheet_by_name("Incidencia")
+
     # Numero de membros
-    nm = int(incid.cell(1,5).value)
-                 
+    nm = int(incid.cell(1, 5).value)
+
     # Matriz de incidencia
-    Inc = np.zeros((nm,4))
-    
+    Inc = np.zeros((nm, 4))
+
     for c in range(nm):
-        Inc[c,0] = int(incid.cell(c+1,0).value)
-        Inc[c,1] = int(incid.cell(c+1,1).value)
-        Inc[c,2] = incid.cell(c+1,2).value
-        Inc[c,3] = incid.cell(c+1,3).value
-    
+        Inc[c, 0] = int(incid.cell(c + 1, 0).value)
+        Inc[c, 1] = int(incid.cell(c + 1, 1).value)
+        Inc[c, 2] = incid.cell(c + 1, 2).value
+        Inc[c, 3] = incid.cell(c + 1, 3).value
+
     ################################################## Ler as cargas
-    carg = arquivo.sheet_by_name('Carregamento')
-    
+    carg = arquivo.sheet_by_name("Carregamento")
+
     # Numero de cargas
-    nc = int(carg.cell(1,4).value)
-                 
+    nc = int(carg.cell(1, 4).value)
+
     # Vetor carregamento
-    F = np.zeros((nn*2,1))
-    
+    F = np.zeros((nn * 2, 1))
+
     for c in range(nc):
-        no = carg.cell(c+1,0).value
-        xouy = carg.cell(c+1,1).value
-        GDL = int(no*2-(2-xouy)) 
-        F[GDL-1,0] = carg.cell(c+1,2).value
-         
+        no = carg.cell(c + 1, 0).value
+        xouy = carg.cell(c + 1, 1).value
+        GDL = int(no * 2 - (2 - xouy))
+        F[GDL - 1, 0] = carg.cell(c + 1, 2).value
+
     ################################################## Ler restricoes
-    restr = arquivo.sheet_by_name('Restricao')
-    
+    restr = arquivo.sheet_by_name("Restricao")
+
     # Numero de restricoes
-    nr = int(restr.cell(1,3).value)
-                 
+    nr = int(restr.cell(1, 3).value)
+
     # Vetor com os graus de liberdade restritos
-    R = np.zeros((nr,1))
-    
+    R = np.zeros((nr, 1))
+
     for c in range(nr):
-        no = restr.cell(c+1,0).value
-        xouy = restr.cell(c+1,1).value
-        GDL = no*2-(2-xouy) 
-        R[c,0] = GDL-1
+        no = restr.cell(c + 1, 0).value  # Nó
+        xouy = restr.cell(c + 1, 1).value  # x ou y
+        GDL = no * 2 - (2 - xouy)  # Grau de liberdade
+        R[c, 0] = GDL - 1  # Grau de liberdade restrito
+
+    return nn, N, nm, Inc, nc, F, nr, R
 
 
-    return nn,N,nm,Inc,nc,F,nr,R
-
-def geraSaida(nome,Ft,Ut,Epsi,Fi,Ti):
-    nome = nome + '.txt'
-    f = open("saida.txt","w+")
-    f.write('Reacoes de apoio [N]\n')
+def geraSaida(nome, Ft, Ut, Epsi, Fi, Ti):
+    nome = nome + ".txt"
+    f = open("saida.txt", "w+")
+    f.write("Reacoes de apoio [N]\n")
     f.write(str(Ft))
-    f.write('\n\nDeslocamentos [m]\n')
+    f.write("\n\nDeslocamentos [m]\n")
     f.write(str(Ut))
-    f.write('\n\nDeformacoes []\n')
+    f.write("\n\nDeformacoes []\n")
     f.write(str(Epsi))
-    f.write('\n\nForcas internas [N]\n')
+    f.write("\n\nForcas internas [N]\n")
     f.write(str(Fi))
-    f.write('\n\nTensoes internas [Pa]\n')
+    f.write("\n\nTensoes internas [Pa]\n")
     f.write(str(Ti))
     f.close()
-    
-
-
